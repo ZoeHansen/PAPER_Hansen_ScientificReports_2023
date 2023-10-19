@@ -1,8 +1,7 @@
-########## R Code for Data-wrangling with Tidyverse - Microbiome ##########
-
+#####################################
+# R Code for Data-wrangling with Tidyverse - Microbiome
 # Author : Zoe Hansen
-# Last modified : 2021.10.25
-
+#####################################
 # This code is designed to wrangle our large datasets from the ERIN
 # metagenomics study. Here, I use the concatenated output from the 
 # taxonomic classifier, Kaiju, and perform basic data wrangling and
@@ -13,20 +12,13 @@
 
 ############## Loading the Data #########################
 
-# First, load 'tidyverse'
-
 library(tidyverse)
 library(plyr)
-
-# Since I've already merged the resistome/microbiome data for all runs in Python, we just need to load
-# this data:
 
 # We will use the 'SamDedupResistome' files since these have been deduplicated. If needed, the original
 # resistome files are available. 
 
-microbiome <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/ERIN_CaseControlFollow_kaiju_SPECIES.csv',
-                      header=TRUE)
-
+microbiome <- read.csv('D://Microbiome/Reads_based/ERIN_CaseControlFollow_kaiju_SPECIES.csv', header=TRUE)
 microbiome <- microbiome[, colSums(microbiome != 0) > 0] 
 microbiome <- microbiome[rowSums(microbiome != 0) > 0,] 
 
@@ -35,21 +27,14 @@ all_seq <- setNames(data.frame(t(microbiome[,-1])), microbiome[,1])
 all_seq <- all_seq %>%
   rownames_to_column(., "ER_ID")
 
+### Import phenotypic data 
 
-############## Import Phenotypic Data ################
-
-# Here, we will import a data file with all of the phenotypic information/metadata
-
-meta <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ERIN_Metagenomes_Metadata.csv',
-                 header = TRUE)
-
+meta <- read.csv('D://ERIN_Metagenomes_Metadata.csv', header = TRUE)
 
 ############## Filtering data to exclude certain samples ##########################
 
-# The 'ERIN_Metagenomes_Metadata.csv' has been modified to include only samples which should be included
-# in the downstream analysis
-# i.e. samples with <50,000 reads, those that did not sequence/align well, highly contaminated, etc. 
-# have been removed from the sample list
+# The 'ERIN_Metagenomes_Metadata.csv' includes only samples relevant to the downstream analysis
+# i.e. samples with <50,000 reads, those that did not sequence/align well, highly contaminated, etc. have been removed from the sample list
 
 # In order to filter these out from our resistome data, we need to use the ER_ID variable from our metadata
 # file to isolate these samples
@@ -59,10 +44,8 @@ ID_use <- meta %>%
 
 # Now, we perform the filtering of the microbiome file(s):
 all_seq_use <- left_join(ID_use, all_seq, by = 'ER_ID')
-
 all_seq_use <- all_seq_use[, colSums(all_seq_use != 0) > 0] 
 all_seq_use <- all_seq_use[rowSums(all_seq_use != 0) > 0,] 
-
 
 # Now, we have a dataframe containing all of the samples of interest (n = 259), which exclude the following:
 # - duplicates
@@ -71,17 +54,13 @@ all_seq_use <- all_seq_use[rowSums(all_seq_use != 0) > 0,]
 # - samples which were excluded in Aim One (Campylobacter) due to high contamination, low quality sequencing/alignment
 # - any samples not included in our final spreadsheet 
 
-#write.csv(all_seq_use, 'D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/ERIN_kaiju_reads_fullpath_casefollow_pairs.csv',
-#          row.names=FALSE)
+write.csv(all_seq_use, 'D://Microbiome/Reads_based/ERIN_kaiju_reads_fullpath_casefollow_pairs.csv', row.names=FALSE)
 
 ############## Normalization by Genome Equivalents ############
 
 # Load in the .csv file with the ouptut from MicrobeCensus
-ags<- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/SecondAnalysis_MEGARes_v1/MicrobeCensus_Output/mc_output_amrplusplus.csv',
-                header=TRUE)
-
+ags<- read.csv('D://MicrobeCensus_Output/mc_output_amrplusplus.csv', header=TRUE)
 ags$ER_ID = as.character(ags$ER_ID)
-
 
 # The suggested metric for normalization from MicrobeCensus is RPKG - reads per kilobase per genome equivalent
 # To accomplish this, we must take (# reads mapped to gene)/ (gene length) / (# genome equivalents)
@@ -91,6 +70,7 @@ ags$ER_ID = as.character(ags$ER_ID)
 
 # Now, we will use our genome equivalents metric to complete the normalization
 # We must then use our MicrobeCensus data to isolate the number of genome equivalents:
+
 genome_equiv <- ags %>%
   dplyr::select(ER_ID, GenomeEquivalents) 
 genome_equiv_use <- left_join(ID_use, genome_equiv, by='ER_ID')
@@ -140,7 +120,6 @@ full_path[495,4] <- 'unclassified'
 ord <- full_path %>%
   select(., -c(Kingdom, Phylum, Class, extra))
 
-
 # FAMILY file
 full_path <- separate(ge_t, col= taxa_name, into=c('Kingdom','Phylum','Class','Order','Family','extra'), sep="\\;")
 full_path[600,5] <- 'cannot be assigned a (non-viral) family'
@@ -155,7 +134,6 @@ full_path[4297,6] <- 'unclassified'
 genus <- full_path %>%
   select(., -c(Kingdom, Phylum, Class, Order, Family, extra))
 
-
 # SPECIES file
 full_path <- separate(ge_t, col= taxa_name, into=c('Kingdom','Phylum','Class','Order','Family','Genus','Species','extra'), sep="\\;")
 full_path[35646,7] <- 'cannot be assigned a (non-viral) species'
@@ -169,8 +147,7 @@ full_path_t <- phy %>%
   spread(key=names(phy)[1], value = 'value') %>%
   dplyr::rename(., ER_ID=key)
 
-write.csv(species, 'D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/GEnorm_ERIN_kaiju_CaseControlFollow_SPECIES.csv',
-          row.names = FALSE)
+write.csv(species, 'D://Microbiome/Reads_based/GEnorm_ERIN_kaiju_CaseControlFollow_SPECIES.csv', row.names = FALSE)
 
 
 ##### Grouping by a taxonomic rank in a "full_path" file #######
@@ -184,6 +161,4 @@ class[1, 1] <- "Cannot_be_assigned"
 
 # For example, we needed to do this for the "KINGDOM" rank above, as Kaiju does not allow
 # direct output of kingdom information :( 
-
-
 
