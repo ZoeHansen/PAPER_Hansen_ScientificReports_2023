@@ -1,24 +1,22 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan 12 13:30:22 2021
-
 @author: Zoe Hansen
-Last modified: 2021.01.13
+Last modified: 2023.09
 """
-### This script is designed to merge the .tsv output files generated within the
+### This script is designed to merge TSV output files generated within the
 ### AmrPlusPlus pipeline. The ResistomeAnalyzer and RarefactionAnalyzer output
-### contains gene, group, mechanism, and class .tsv files which will be merged
-### into a single .csv file for all ERIN metagenome samples
+### contains gene, group, mechanism, and class TSV files which will be merged
+### into a single CSV file for all metagenome samples
 
-#Convert the .tsv files to .csv files (try to remove columns, rename columns in the process)
 import pandas as pd
 import os
 import numpy as np
 
+# Locate deduplicated resistome feature files
 rootdir = r'D://HPCC/AmrPlusPlus/Run1_results/SamDedupRunResistome'
 os.chdir(rootdir)
     
-a=open('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/Run1_sampleIDs_trimmed.txt')
+a=open('Run1_sampleIDs_trimmed.txt') # Sample IDs used to call files in 'for loop'
 a1 = a.read().splitlines()
 
 for i in a1:
@@ -46,16 +44,16 @@ a2 = a1[2:]
 main = pd.read_csv('gene_info_ER0043.csv', sep = ',', header = 0) #names = ["Gene", "ERIN_27"])
 main1=pd.DataFrame(main)
 main1.drop('Gene_Fraction', axis=1, inplace=True)
-#main1.columns=['Level','ER0043']  #For rarefaction only
+#main1.columns=['Level','ER0043']  #For rarefaction output only
 
 main2 = pd.read_csv('gene_info_ER0138.csv', sep = ',', header = 0) #names = ["Gene", "ERIN_29"])
 main2=pd.DataFrame(main2)
 main2.drop('Gene_Fraction', axis=1, inplace=True)
-#main2.columns=['Level','ER0138']  #For rarefaction only 
+#main2.columns=['Level','ER0138']  #For rarefaction output only 
 
 merged = pd.merge(main1, main2, on = 'Gene', how = 'outer')
 
-#Merge the rest of the samples:
+#Merge the rest of the samples onto the "starter":
 
 for i in a2:
     main3 = pd.read_csv('gene_info_' + ''.join(i) + '.csv', sep = ',', header = 0)
@@ -100,6 +98,8 @@ for i in a2:
 print(merg_frac)
 
 merg_frac.to_csv('Run1_SamDedupResistome_GeneFraction_merged.csv', sep=',', index=False)
+
+### Above code should be repeated for Runs 2-4 (results will be merged at the end of the this code)
 
 ###################################################################################
 
