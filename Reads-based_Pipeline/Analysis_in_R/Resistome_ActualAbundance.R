@@ -3,21 +3,16 @@
 # Aim 2 - Actual Abundance of ARGs
 
 ##############################################
-
-### Load libraries
-
 library(tidyverse)
 library(ggplot2)
 library(ggpubr)
-
-
 #################################################
 # Top 10 ARG Classes
 #################################################
 
 # Cases
 
-case.class <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_ClassLevel_Top10_Cases.csv',
+case.class <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_ClassLevel_Top10_Cases.csv',
                   header = TRUE)
 
 case.c.t <- case.class %>%
@@ -64,7 +59,7 @@ case.c.plot <- ggplot(data = case.c, aes(x =reorder(Class, -CASE), y = CASE, fil
 
 # Follow-Ups
 
-follow.class <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_ClassLevel_Top10_FollowUps.csv',
+follow.class <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_ClassLevel_Top10_FollowUps.csv',
                        header = TRUE)
 
 follow.c.t <- follow.class %>%
@@ -124,7 +119,7 @@ ggarrange(case.c.plot,
 
 # Cases
 
-case.class <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_ClassLevel_Top25_Cases.csv',
+case.class <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_ClassLevel_Top25_Cases.csv',
                        header = TRUE)
 
 case.c.t <- case.class %>%
@@ -181,7 +176,7 @@ case.c.plot <- ggplot(data = case.c, aes(x =reorder(Class, -CASE), y = CASE, fil
 
 # Follow-Ups
 
-follow.class <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_ClassLevel_Top25_FollowUps.csv',
+follow.class <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_ClassLevel_Top25_FollowUps.csv',
                          header = TRUE)
 
 follow.c.t <- follow.class %>%
@@ -249,7 +244,7 @@ ggarrange(case.c.plot + rremove('xlab'),
 
 # Cases
 
-case.group <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_GroupLevel_Top10_Cases.csv',
+case.group <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_GroupLevel_Top10_Cases.csv',
                        header = TRUE)
 
 case.group$Group <- factor(case.group$Group, levels = c('MLS23S',
@@ -290,7 +285,7 @@ case.g.plot <- ggplot(data = case.group, aes(x =Group, y = CASE, fill = Group))+
 
 # Follow-Ups
 
-follow.group <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_GroupLevel_Top10_FollowUps.csv',
+follow.group <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_GroupLevel_Top10_FollowUps.csv',
                        header = TRUE)
 
 follow.group$Group <- factor(follow.group$Group, levels = c('MLS23S',
@@ -344,7 +339,7 @@ ggarrange(case.g.plot + rremove('xlab'),
 
 # Cases
 
-case.group <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_GroupLevel_Top25_Cases.csv',
+case.group <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_GroupLevel_Top25_Cases.csv',
                        header = TRUE)
 
 case.group$Group <- factor(case.group$Group, levels = c('MLS23S',
@@ -390,7 +385,7 @@ case.g.plot <- ggplot(data = case.group, aes(x =Group, y = CASE, fill = Group))+
 
 # Follow-Ups
 
-follow.group <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_GroupLevel_Top25_FollowUps.csv',
+follow.group <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/AverageAbundance_ALL_TYPES_GroupLevel_Top25_FollowUps.csv',
                          header = TRUE)
 
 follow.group$Group <- factor(follow.group$Group, levels = c('MLS23S',
@@ -448,7 +443,7 @@ ggarrange(case.g.plot + rremove('xlab'),
 # Top 10 ARG Classes Combined
 #################################################
 
-class.combined <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/2022_01_14/AverageAbundance_ALL_TYPES_ClassLevel_CaseFollowPairs_Top10combined.csv',
+class.combined <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/2022_01_14/AverageAbundance_ALL_TYPES_ClassLevel_CaseFollowPairs_Top10combined.csv',
                          header=TRUE)
 
 class.combined$Class <- factor(class.combined$Class, levels = c('Other',
@@ -496,7 +491,7 @@ ggplot(data = class.combined, aes(x = Class, y = value, fill = Case.status))+
 # Top 10 ARG Groups Combined
 #################################################
 
-group.combined <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/2022_01_14/AverageAbundance_ALL_TYPES_GroupLevel_CaseFollowPairs_Top10combined.csv',
+group.combined <- read.csv('D://Resistome/Reads_based/Abundance/ActualAbundance/ALL_TYPES/2022_01_14/AverageAbundance_ALL_TYPES_GroupLevel_CaseFollowPairs_Top10combined.csv',
                            header=TRUE)
 
 group.combined$Group <- factor(group.combined$Group, 
