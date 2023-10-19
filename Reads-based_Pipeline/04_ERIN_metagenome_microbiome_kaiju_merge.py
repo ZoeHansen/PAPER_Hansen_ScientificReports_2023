@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jan 29 17:25:12 2021
-
-@author: hanse
-Last modified: 2021.10.25
+@author: Zoe Hansen
+Last modified: 2023.09
 """
 
 # This script is designed to compile all of the taxonomic classification
@@ -21,7 +19,7 @@ import numpy as np
 rootdir = r'D://HPCC/ERIN_Kaiju_taxonomic_classification_READS_102021/'
 os.chdir(rootdir)
     
-a=open('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/sampleIDs_all.txt')
+a=open('sampleIDs_all.txt')
 a1 = a.read().splitlines()
 
 # First we will address the 'kaiju_reads_summary_all.tsv' files.
