@@ -1,6 +1,6 @@
 ########################################################
 
-# Aim 2: Normality Testing (Case, Control, Follow-Up and Case vs. Follow)
+# Normality Testing (Case, Control, Follow-Up and Case vs. Follow-Up)
 
 ########################################################
 
@@ -15,35 +15,28 @@ library(ggprism)
 library(vegan)
 library(calibrate)
 
-pheno <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ERIN_Metagenomes_Metadata_60_CaseFollowPairs_wControls.csv',
-                  header = TRUE) 
-
-args = read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/ERIN_GEnorm_ALL_TYPES_gene_level.csv', 
-                header = TRUE)
-
-microbiome = read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/GEnorm_ERIN_kaiju_CaseControlFollow_SPECIES.csv',
-                      header=TRUE)
+pheno <- read.csv('D://ERIN_Metagenomes_Metadata_60_CaseFollowPairs_wControls.csv',header = TRUE) 
+args = read.csv('D://Resistome/Reads_based/ERIN_GEnorm_ALL_TYPES_gene_level.csv', header = TRUE)
+microbiome = read.csv('D://Microbiome/Reads_based/GEnorm_ERIN_kaiju_CaseControlFollow_SPECIES.csv', header=TRUE)
 
 ### If data needs to be transposed (species):
-
 microbiome$Species <- microbiome$Species %>%
   replace_na("Unknown")
-
 micro <- ddply(microbiome, "Species", numcolwise(sum))
-
 micro<- micro[, colSums(micro[,-1] != 0) > 0] 
 micro <- micro[rowSums(micro[,-1] != 0) > 0,]
 
+# Assign "data" variable to microbiome 
 data <- micro %>%
   gather(key = key, value = value, 2:ncol(micro)) %>%
   spread(key=names(micro)[1], value = 'value') %>%
   dplyr::rename(., ER_ID=key)
 
-data <- args
+# Overwrite 'data' variable to repeat analysis on resistome data (change axis labels, limits accordingly)
+# data <- args
 
 data<- data[, colSums(data[,-1] != 0) > 0] 
 data <- data[rowSums(data[,-1] != 0) > 0,] 
-
 data[is.na(data)] <- 0
 
 ########################################################
@@ -53,30 +46,18 @@ data[is.na(data)] <- 0
 # Select the relevant metadata fields to include in analysis
 health <- pheno %>%
   dplyr::select(ER_ID, Case.status, Pathogen, Antibiotics, Reassigned.Pair.ID) #%>%#, Case.Follow_ID)
-#  filter(!grepl('Control', Case.status))
+#  filter(!grepl('Control', Case.status)) # (Can remove controls for paired case vs. follow-up analysis)
 
 health$Antibiotics[health$Antibiotics == ""] <- "No"
 
 IDs_use <- health %>%
   dplyr::select(ER_ID)
 
-
 # Merge metadata with AGS-normalized abundances
 #Full Case_Control Campylobacter dataset with metadata of interest
 data_2 <- left_join(IDs_use, data, by = 'ER_ID')
 
-# Remove any lingering zeroes to avoid downstream errors
-data_2 <- data_2[, colSums(data_2 != 0) > 0]
-data_2 <- data_2[rowSums(data_2 != 0) > 0,] 
-
-
 data_cc <- left_join(health, data_2, by = "ER_ID")
-
-# If needed, remove any samples from analysis here
-data_cc <- data_cc %>%
-  filter(!grepl('Control', Case.status)) #%>%
-#  filter(!grepl('FollowUp',Case.status))%>%
-#  drop_na(.,Case.Follow_ID)
 
 data_cc$ER_ID <- factor(data_cc$ER_ID)
 data_cc$Case.status <- factor(data_cc$Case.status)
@@ -88,13 +69,12 @@ data_cc[is.na(data_cc)] <- 0
 data_cc <- data_cc[, colSums(data_cc != 0) > 0]
 data_cc <- data_cc[rowSums(data_cc != 0) > 0,] 
 
-
 ########################################################
 # Calculate and plot within-sample (Alpha) Diversity
 ########################################################
 
 # Richness (of genes) across our samples
-r.c = specnumber(data_cc[,-c(1:5)])
+r.c = specnumber(data_cc[,-c(1:5)]) # Columns 1-5 contain metadata
 
 # Shannon diversity
 h.c = diversity(data_cc[,-c(1:5)], index = 'shannon')
@@ -106,10 +86,6 @@ pielou.c = h.c/log(r.c)
 # Combine alpha diversity data and Case status information
 div.c=tibble(data_cc$ER_ID, data_cc$Case.status, data_cc$Pathogen, data_cc$Reassigned.Pair.ID, r.c, h.c, pielou.c)
 colnames(div.c)=c("ER_ID", "Case.status", "Pathogen","Pair","Richness", "Shannon", "Pielou")
-
-div.c.cf <- div.c %>%
-  filter(!grepl('Control', Case.status))
-
 
 ########################################################
 # Perform Normality Test with Shapiro-Wilks & Visualization
