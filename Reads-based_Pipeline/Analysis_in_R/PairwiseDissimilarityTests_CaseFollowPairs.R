@@ -1,6 +1,6 @@
 ########################################################
 
-# Mantel Test
+# Mantel Test to Assess Dissimilarity between Cases and Follow-Ups
 
 ########################################################
 
