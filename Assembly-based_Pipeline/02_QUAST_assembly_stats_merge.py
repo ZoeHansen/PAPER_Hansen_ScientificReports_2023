@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan 11 18:49:00 2022
-
-@author: hanse
+@author: Zoe Hansen
 Last Modified: 2022.01.11
 """
 
@@ -13,22 +11,22 @@ Last Modified: 2022.01.11
 # Create CSV files for each sample 
 ###########################
 
-#Read in .txt files to .csv files (try to remove columns, rename columns in the process)
+#Read in TXT files to CSV files (try to remove columns, rename columns in the process)
 import pandas as pd
 import os
 import numpy as np
 
-rootdir = r'D://HPCC/Spring2021_Aim2_Pipeline/QUAST_assembly_stats_072021/'
+rootdir = r'D://HPCC/QUAST_assembly_stats/'
 os.chdir(rootdir)
     
-a=open('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ERIN_samples_IDs_clean.txt')
+a=open('samples_IDs_clean.txt')
 a1 = a.read().splitlines()
 
 for i in a1:
     file = pd.read_csv(r"".join(i)+'.report.tsv', sep='\t', header = 0)
     quast = pd.DataFrame(file)
     quast.columns = ['Assembly_stats', ''.join(i)]
-    quast.to_csv('D://HPCC/Spring2021_Aim2_Pipeline/QUAST_assembly_stats_072021/CSV_files/'+"".join(i)+'.quast_report.csv', sep = ',', index=False)
+    quast.to_csv('D://HPCC/QUAST_assembly_stats/CSV_files/'+"".join(i)+'.quast_report.csv', sep = ',', index=False)
     print(i)  
   
 ##################################
@@ -36,7 +34,7 @@ for i in a1:
 ##################################
 
 # First, we will merge the 'ARGs_per_genera' files
-dir1 = r'D://HPCC/Spring2021_Aim2_Pipeline/QUAST_assembly_stats_072021/CSV_files/'
+dir1 = r'D://HPCC/QUAST_assembly_stats/CSV_files/'
 os.chdir(dir1)
 
 # Create a new variable 'a2' excluding our first two samples which initiate the merged file
@@ -62,6 +60,6 @@ for i in a2:
     
 print(quast_merged)
 
-quast_merged.to_csv('ERIN_QUAST_assembly_statistics.csv', sep = ',', index = False)
+quast_merged.to_csv('QUAST_assembly_statistics.csv', sep = ',', index = False)
 
 
