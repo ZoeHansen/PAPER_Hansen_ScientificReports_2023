@@ -1,10 +1,9 @@
 #################################################
 
-# Aim 2: MMUPHin - Differentially Abundant Taxa & ARGs
+# MMUPHin - Differentially Abundant Taxa & ARGs
 
 #################################################
 
-# Load libraries
 library(MMUPHin)
 library(magrittr)
 library(tidyverse)
@@ -19,11 +18,10 @@ library(vegan)
 # Note: metadata should contain samples as rows and feature data should contain samples as columns
 
 # Microbiome
-abd.data <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/RelativeAbundance_GENUS_CaseFollowPairs.csv',
-                     header=TRUE)
+abd.data <- read.csv('D://Microbiome/Reads_based/Abundance/RelativeAbundance/RelativeAbundance_GENUS_CaseFollowPairs.csv', header=TRUE)
 
 # Resistome
-abd.data <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/RelativeAbundance_ALL_TYPES_GroupLevel_CaseFollowPaired.csv')
+abd.data <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/RelativeAbundance_ALL_TYPES_GroupLevel_CaseFollowPaired.csv')
 
 # Need to remove a couple of columns and transpose resistome RA (SKIP for taxonomy!!)
 abd.data <- abd.data %>%
@@ -34,12 +32,10 @@ abd.data <- abd.data %>%
   spread(key=names(abd.data)[1], value = 'value') %>%
   dplyr::rename(., ER_ID=key)
 
-
 # Convert taxonomy/ARGs to rownames 
 rownames(abd.data) <- abd.data$ER_ID
 abd.data <- abd.data %>%
   dplyr::select(-ER_ID)
-
 
 # Make sure to sort ER_ID by descending before importing (*insert eye roll here*)
 meta.data <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ERIN_Metagenomes_Metadata_60_CaseFollowPairs.csv',
@@ -60,23 +56,11 @@ meta.data$Followup.days <- as.integer(meta.data$Followup.days)
 meta.data$Case.status <- factor(meta.data$Case.status, levels=c('Case','FollowUp'))
 meta.data$Antibiotics <- factor(meta.data$Antibiotics, levels=c('No','Yes'))
 
-# Create new Hospital variable with numeric prefix for reference level setting
-meta.data$Hospital_mod =rep('0' ,nrow(meta.data))
-meta.data$Hospital_mod[meta.data$Hospital == 'DMC'] = '1'
-meta.data$Hospital_mod[meta.data$Hospital == 'MDHHS'] = '2'
-meta.data$Hospital_mod[meta.data$Hospital == 'Sparrow'] = '3'
-meta.data$Hospital_mod[meta.data$Hospital == 'Spectrum'] = '4'
-meta.data$Hospital_mod[meta.data$Hospital == 'UM'] = '5'
-meta.data$Hospital_mod[meta.data$Hospital == 'Unknown'] = '6'
-
-meta.data$Hospital_mod <- as.numeric(meta.data$Hospital_mod)
-
 rownames(meta.data) <- meta.data$ER_ID
-
 
 #### Batch Correction ####
 
-# First, we will attempt to correct for batch effects due to Sequencing Run (Microbiome Data)
+# First, we will attempt to correct for batch effects due to Sequencing Run (only necessary for microbiome data)
 
 fit_adjust_batch <- adjust_batch(feature_abd=abd.data,    # abundance matrix
                                  batch='Run',             # the batch variable requiring correction
@@ -100,8 +84,6 @@ print(fit_adonis_after)
 
 # Note: compare amount of variability explained using the R2 measure; check for significance
 # This may depend on the resolution of taxa (e.g. phylum vs. genus vs. species)
-
-
 
 #### Meta-analytical Differential Abundance ####
 
@@ -127,8 +109,6 @@ fit_lm_meta <- lm_meta(feature_abd=abd.data,
                        data=meta.data,             
                        control=list(verbose=FALSE))
 
-
-
 # Microbiome: envfit() pulled out:
   # age in years
   # sequencing run (batch)
@@ -137,7 +117,6 @@ fit_lm_meta <- lm_meta(feature_abd=abd.data,
   # year of sampling
   # use of Abx
   # Follow-up days and hospital were nearly significant -- could include
-
 
 # Resistome: envfit() pulled out: 
   # age in years
@@ -156,8 +135,7 @@ meta_fits <- fit_lm_meta$meta_fits
 meta_fits_signif <- meta_fits %>%
   filter(qval.fdr < 0.05)         # pull out significant p-adjusted values
 
-write.csv(meta_fits_signif, 'D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/MMUPHin/MMUPHin_ARG_GENUS_CaseStatus_CaseFollowPairs.csv',
-          row.names=FALSE)
+write.csv(meta_fits_signif, 'D://MMUPHin/MMUPHin_ARG_GENUS_CaseStatus_CaseFollowPairs.csv', row.names=FALSE)
 
 # Plot the significant findings (differential abundance)
 meta_fits_signif %>%
@@ -186,21 +164,6 @@ meta_fits_signif %>%
     y = '\nCoefficient\n',
     fill = 'Health Status')
 
-
-##### Investigating Discrete Population Structure #####
-
-# For this portion, we will investigate cases and follow-ups separately
-
-case.meta <- subset(meta.data, Case.status == 'Case')
-case.abd.adj <- micro_abd_adj[, rownames(case.meta)]
-
-D_case <- vegdist(t(case.abd.adj))
-
-
-follow.meta <- subset(meta.data, Case.status == 'FollowUp')
-follow.abd.adj <- micro_abd_adj[, rownames(follow.meta)]
-
-D_follow <- vegdist(t(follow.abd.adj))
 
 ##### Investigating Continuous Population Structure #####
 
@@ -237,7 +200,6 @@ as.data.frame(case.mds) %>%
   coord_fixed()
 
 
-
 ### Follow-Ups ###
 follow.fit_continuous <- continuous_discover(feature_abd = follow.abd.adj,
                                            batch = "Run",
@@ -265,7 +227,6 @@ as.data.frame(follow.mds) %>%
   ggplot(aes(x = Axis1, y = Axis2, color = score1)) +
   geom_point() +
   coord_fixed()
-
 
 
 ##### Cases + Follow-Ups Together ######
@@ -319,9 +280,7 @@ colnames(cf.mds) <- c("Axis1", "Axis2")
 cf.mds.data <- as.data.frame(cf.mds) %>% 
   mutate(score1 = cf.fit_continuous$consensus_scores[, 1])
 
-write.csv(cf.mds.data, 'D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/MMUPHin/MMUPHin_ARG_CLASS_MDS_ScoringData_CaseStatus_CaseFollowPairs.csv',
-          row.names=FALSE)
-
+write.csv(cf.mds.data, 'D://MMUPHin/MMUPHin_ARG_CLASS_MDS_ScoringData_CaseStatus_CaseFollowPairs.csv', row.names=FALSE)
 
 arg_mds<-ggplot(data=cf.mds.data, aes(x = Axis1, y = Axis2)) +
   geom_point(aes(color=score1, fill=score1, shape=shape),
@@ -358,8 +317,6 @@ arg_mds<-ggplot(data=cf.mds.data, aes(x = Axis1, y = Axis2)) +
        x='\nMDS1',
        y='MDS2\n')
 
-
-
 ##### Create Combination Plot #####
 
 comb_plot<-ggarrange(genus_loading,
@@ -372,13 +329,7 @@ comb_plot<-ggarrange(genus_loading,
           align='hv')+
   theme(plot.margin = margin(0.5,0.1,0.1,0.5, "cm"))
 
-#setwd('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/MMUPHin/UpdatedPlots_July2022/')
-
 ggsave('MMUPHin_LoadingsOrdination_CombinedPlot_GENUS_GROUP_v2.eps',
        width=50, height=45, units='cm', dpi=300,
        device='eps')
-
-
-
-
 
