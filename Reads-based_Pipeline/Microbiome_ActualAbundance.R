@@ -1,16 +1,12 @@
 ##############################################
 
-# Aim 2 - Actual Abundance of Taxa
+# Actual Abundance of Taxa
 
 ##############################################
-
-### Load libraries
-
 library(tidyverse)
 library(ggplot2)
 library(ggpubr)
 library(viridis)
-
 #################################################
 # Top 10 PHYLA
 #################################################
@@ -19,11 +15,10 @@ library(viridis)
 
 # Cases
 
-case.phylum <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_PHYLUM_CaseOnly.csv',
+case.phylum <- read.csv('D://Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_PHYLUM_CaseOnly.csv',
                         header=TRUE, stringsAsFactors = FALSE)
 
 case.phylum$Phylum <- factor(case.phylum$Phylum, levels = case.phylum$Phylum[order(-case.phylum$value)])
-
 
 case.p.plot<- ggplot(data = case.phylum, aes(x = Phylum, y = value, fill = Phylum))+
   geom_bar(stat = 'identity', width = 0.9, position = 'dodge')+ 
@@ -49,11 +44,10 @@ case.p.plot<- ggplot(data = case.phylum, aes(x = Phylum, y = value, fill = Phylu
 
 # Follow-Ups
 
-follow.phylum <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_PHYLUM_FollowUpOnly.csv',
+follow.phylum <- read.csv('D://Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_PHYLUM_FollowUpOnly.csv',
                         header=TRUE, stringsAsFactors = FALSE)
 
 follow.phylum$Phylum <- factor(follow.phylum$Phylum, levels = follow.phylum$Phylum[order(-follow.phylum$value)])
-
 
 follow.p.plot<- ggplot(data = follow.phylum, aes(x = Phylum, y = value, fill = Phylum))+
   geom_bar(stat = 'identity', width = 0.9, position = 'dodge')+ 
@@ -90,11 +84,10 @@ ggarrange(case.p.plot + rremove('xlab'),
 
 # Case
 
-case.genus <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_GENUS_CasesOnly.csv',
+case.genus <- read.csv('D://Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_GENUS_CasesOnly.csv',
                        header=TRUE)
 
 case.genus$Genus<- factor(case.genus$Genus, levels = case.genus$Genus[order(-case.genus$CASE)])
-
 
 case.g.plot<- ggplot(data = case.genus, aes(x = Genus, y = CASE, fill = Genus))+
   geom_bar(stat = 'identity', width = 0.9, position = 'dodge')+ 
@@ -119,11 +112,10 @@ case.g.plot<- ggplot(data = case.genus, aes(x = Genus, y = CASE, fill = Genus))+
 
 # Follow-Ups
 
-follow.genus <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_GENUS_FollowUpsOnly.csv',
+follow.genus <- read.csv('D://Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_GENUS_FollowUpsOnly.csv',
                           header=TRUE, stringsAsFactors = FALSE)
 
 follow.genus$Genus <- factor(follow.genus$Genus, levels = follow.genus$Genus[order(-follow.genus$FOLLOW)])
-
 
 follow.g.plot<- ggplot(data = follow.genus, aes(x = Genus, y = FOLLOW, fill = Genus))+
   geom_bar(stat = 'identity', width = 0.9, position = 'dodge')+ 
@@ -161,11 +153,10 @@ ggarrange(case.g.plot + rremove('xlab'),
 
 # Case
 
-case.genus <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top25_GENUS_CasesOnly.csv',
+case.genus <- read.csv('D://Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top25_GENUS_CasesOnly.csv',
                        header=TRUE)
 
 case.genus$Genus<- factor(case.genus$Genus, levels = case.genus$Genus[order(-case.genus$CASE)])
-
 
 case.g.plot<- ggplot(data = case.genus, aes(x = Genus, y = CASE, fill = Genus))+
   geom_bar(stat = 'identity', width = 0.9, position = 'dodge')+ 
@@ -190,11 +181,10 @@ case.g.plot<- ggplot(data = case.genus, aes(x = Genus, y = CASE, fill = Genus))+
 
 # Follow-Ups
 
-follow.genus <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top25_GENUS_FollowUpsOnly.csv',
+follow.genus <- read.csv('D://Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top25_GENUS_FollowUpsOnly.csv',
                          header=TRUE, stringsAsFactors = FALSE)
 
 follow.genus$Genus <- factor(follow.genus$Genus, levels = follow.genus$Genus[order(-follow.genus$FOLLOW)])
-
 
 follow.g.plot<- ggplot(data = follow.genus, aes(x = Genus, y = FOLLOW, fill = Genus))+
   geom_bar(stat = 'identity', width = 0.9, position = 'dodge')+ 
@@ -230,7 +220,7 @@ ggarrange(case.g.plot + rremove('xlab'),
 # Top 10 PHYLA Combined
 #################################################
 
-phyla.combined <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_PHYLUM_CaseFollowCombined.csv',
+phyla.combined <- read.csv('D://Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_PHYLUM_CaseFollowCombined.csv',
                            header=TRUE)
 
 phyla.combined$Phylum[5]<- 'Cannot be assigned'
@@ -282,7 +272,7 @@ ggplot(data = phyla.combined, aes(x = Phylum, y = value, fill = Case.status))+
 # Top 10 GENUS Combined
 #################################################
 
-genus.combined <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_GENUS_CaseFollowCombined.csv',
+genus.combined <- read.csv('D://Microbiome/Reads_based/Abundance/ActualAbundance/AverageAbundance_Top10_GENUS_CaseFollowCombined.csv',
                            header=TRUE)
 
 # To exclude "cannot be assigned"
