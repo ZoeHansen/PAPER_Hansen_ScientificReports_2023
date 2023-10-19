@@ -1,6 +1,6 @@
 #################################################
 
-# Aim 2: Relative Abundance of ARGs - Case, Control, Follow
+# Relative Abundance of ARGs - Case, Control, Follow
 
 #################################################
 # Load libraries and data
@@ -15,22 +15,17 @@ library(ggthemes)
 library(scales)
 library(viridis)
 
-class_data <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/ERIN_GEnorm_DRUG_and_MULTI_class_level.csv',
-                       header = TRUE)
+class_data <- read.csv('D://Resistome/Reads_based/ERIN_GEnorm_DRUG_and_MULTI_class_level.csv', header = TRUE)
 class_data <- class_data[, colSums(class_data != 0) > 0]
 
-
 # Import metadata
-
-meta <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ERIN_Metagenomes_Metadata_60_CaseFollowPairs.csv',
-                 header = TRUE)
+meta <- read.csv('D://ERIN_Metagenomes_Metadata_60_CaseFollowPairs.csv', header = TRUE)
 
 meta <- meta %>%
   dplyr::select(ER_ID, Case.status, Pathogen, Case.Follow_ID)%>%
   filter(!grepl('Control',Case.status)) %>%
 #  filter(!grepl('FollowUp', Case.status))%>%
   drop_na()
-
 
 #################################################
 # Calculate relative abundance of ARGs in samples
@@ -45,16 +40,13 @@ meta <- meta %>%
 class_data1 <- class_data %>%
   mutate(., SampTotal = rowSums(class_data[,-1]))
 
-
 # Create a new dataframe with the relative abundance information
 ra <- cbind(class_data1$ER_ID, class_data1[, -c(1,81)] / class_data1$SampTotal)
 colnames(ra)[1] <- 'ER_ID'
 
-
 # Merge our relative abundance dataframe with metadata and order by Case.status
 ra_df <- left_join(meta, ra, by = "ER_ID") %>%
   arrange(., Case.status)
-
 
 ####### Rename Select Columns ######
 ra_df <-dplyr::rename(ra_df, 'Multi-compound' = 'Multi.compound')
@@ -91,14 +83,14 @@ ra_df <- dplyr::rename(ra_df, 'Zinc resistance' = 'Zinc_resistance')
 
 ra_df <- ra_df[, colSums(ra_df != 0)>0]
 
-write.csv(ra_df, 'D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/RelativeAbundance_DRUGS_AND_MULTI_MechanismLevel_CaseFollowPaired.csv',
+write.csv(ra_df, 'D://Resistome/Reads_based/Abundance/RelativeAbundance/RelativeAbundance_DRUGS_AND_MULTI_MechanismLevel_CaseFollowPaired.csv',
           row.names = FALSE)
 
 #################################################
 # Prepare data for plotting
 #################################################
 
-ra_df <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/DRUGS_and_MULTI/RelativeAbundance_DRUG_and_MULTI_ClassLevel_CaseFollowPaired.csv',
+ra_df <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/DRUGS_and_MULTI/RelativeAbundance_DRUG_and_MULTI_ClassLevel_CaseFollowPaired.csv',
                   header=TRUE, check.names = FALSE)
 
 # Extract Case status data to append later (the melt function requires only one variable to collapse upon)
@@ -127,7 +119,6 @@ ra_df.long <- melt(ra_df.cc, id.vars = 'ER_ID', variable.name = 'Resistance_Clas
 ra_df.long$Bacteria = rep(Bact, times = (ncol(ra_df.cc)-1))
 ra_df.long$Num = rep(id.num.case, times = (ncol(ra_df.cc)-1))
 
-
 #################################################
 # Plot relative abundance 
 #################################################
@@ -140,8 +131,6 @@ getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 # Facet by Health Status
 ggplot(data = ra_df.long, aes(x = Num, y = value, fill = Resistance_Class))+
   geom_bar(stat = 'identity', width = 1, position = 'stack')+ 
-#  scale_fill_manual(values = getPalette(17), 
-#                    guide = guide_legend(nrow=4))+
   scale_color_viridis(discrete = TRUE)+
   scale_fill_viridis(discrete = TRUE, option = 'D', 
                      guide=guide_legend(nrow=1))+
@@ -154,7 +143,6 @@ ggplot(data = ra_df.long, aes(x = Num, y = value, fill = Resistance_Class))+
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-#        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         panel.grid.minor = element_blank(), 
         panel.background = element_blank(),
@@ -202,7 +190,8 @@ ggplot(data = ra_df.long, aes(x = Num, y = value, fill = Resistance_Class))+
 ####################################################
 # Plotting Top 10 ARG Classes 
 ####################################################
-case.class <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_ClassLevel_Top10_Cases.csv',
+### Cases
+case.class <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_ClassLevel_Top10_Cases.csv',
                        header=TRUE)
 
 case.class <- case.class %>%
@@ -226,9 +215,9 @@ case.c.long <- melt(case.c.wID, id.vars = c('ER_ID', 'Case.status','Pathogen','C
 case.c.long$value <- as.numeric(case.c.long$value)
 
 
-# Follow-Ups
+### Follow-Ups
 
-follow.class <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_ClassLevel_Top10_FollowUps.csv',
+follow.class <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_ClassLevel_Top10_FollowUps.csv',
                          header=TRUE)
 
 follow.class <- follow.class %>%
@@ -249,13 +238,11 @@ follow.c.wID <- follow.c.wID %>%
 follow.c.long <- melt(follow.c.wID, id.vars = c('ER_ID','Case.status','Pathogen','Case.Follow_ID'),
                       variable.name = 'CLASS')
 
-
 follow.c.long$value <- as.numeric(follow.c.long$value)
-
 
 combined.c.long <- rbind(case.c.long, follow.c.long)
 
-
+### Plotting
 ggplot(data = combined.c.long, aes(x = Case.Follow_ID, y = value, fill = CLASS))+
   geom_bar(stat = 'identity', width = 1, position = 'stack')+ 
   scale_color_viridis(discrete = TRUE, option = 'C')+
@@ -264,19 +251,16 @@ ggplot(data = combined.c.long, aes(x = Case.Follow_ID, y = value, fill = CLASS))
   scale_x_discrete('Num', name = 'Health Status')+
   scale_y_continuous(expand = c(0.01,0))+
   facet_wrap( ~ Case.status, strip.position = 'bottom', scales = 'free_x')+ 
-#  facet_wrap( ~Case.status, strip.position='left', ncol=1, scales = 'free_y')+
   theme(legend.position = 'bottom', 
         legend.title = element_text(face='bold', size=12),
         legend.text = element_text(size = 11),
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-#        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         strip.text = element_text(size=12),
         panel.grid.minor = element_blank(), 
         panel.background = element_blank(),
-#        panel.spacing = unit(0.5,'cm'),
         axis.title=element_text(size=14,face="bold"),
         plot.title = element_text(size=18),
         axis.text.y = element_text(size = 12), 
@@ -293,10 +277,7 @@ ggplot(data = combined.c.long, aes(x = Case.Follow_ID, y = value, fill = CLASS))
 ####################################################
 
 ### Cases
-
-# Cases
-
-case.group <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_GroupLevel_Top25_Cases.csv',
+case.group <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_GroupLevel_Top25_Cases.csv',
                        header=TRUE)
 
 case.group <- case.group %>%
@@ -320,9 +301,9 @@ case.g.long <- melt(case.g.wID, id.vars = c('ER_ID', 'Case.status','Pathogen','C
 case.g.long$value <- as.numeric(case.g.long$value)
 
 
-# Follow-Ups
+### Follow-Ups
 
-follow.group <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_GroupLevel_Top25_FollowUps.csv',
+follow.group <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_GroupLevel_Top25_FollowUps.csv',
                          header=TRUE)
 
 follow.group <- follow.group %>%
@@ -345,12 +326,9 @@ follow.g.wID <- follow.g.wID %>%
 follow.g.long <- melt(follow.g.wID, id.vars = c('ER_ID','Case.status','Pathogen','Case.Follow_ID'),
                       variable.name = 'GROUP')
 
-
 follow.g.long$value <- as.numeric(follow.g.long$value)
 
-
 combined.long <- rbind(case.g.long, follow.g.long)
-
 
 ggplot(data = combined.long, aes(x = Case.Follow_ID, y = value, fill = GROUP))+
   geom_bar(stat = 'identity', width = 1, position = 'stack')+ 
@@ -381,16 +359,13 @@ ggplot(data = combined.long, aes(x = Case.Follow_ID, y = value, fill = GROUP))+
   ylab('Relative Abundance per Sample\n')
 
 
-###### Plotting Case/Follow Top 25 GroupsSeparately ######
+###### Plotting Case/Follow Top 25 Groups Separately ######
 
 #To plot these separately (with different color schemes):
 ggplot(data = case.g.long, aes(x = Case.Follow_ID, y = value, fill = GROUP))+
   geom_bar(stat = 'identity', width = 1, position = 'stack')+ 
   scale_fill_manual(values = colors, 
                     guide = guide_legend(nrow=5))+
-  #  scale_color_viridis(discrete = TRUE)+
-  #  scale_fill_viridis(discrete = TRUE, option = 'D', 
-  #                     guide=guide_legend(nrow=5))+
   scale_x_discrete('Num', name = 'Cases')+
   scale_y_continuous(expand = c(0.01,0))+
   theme(legend.position = 'bottom', 
@@ -418,9 +393,6 @@ ggplot(data = follow.g.long, aes(x = Case.Follow_ID, y = value, fill = GROUP))+
   geom_bar(stat = 'identity', width = 1, position = 'stack')+ 
   scale_fill_manual(values = colors$Color, 
                     guide = guide_legend(nrow=5))+
-#  scale_color_viridis(discrete = TRUE)+
-#  scale_fill_viridis(discrete = TRUE, option = 'C', 
-#                     guide=guide_legend(nrow=5))+
   scale_x_discrete('Num', name = 'Follow-Ups')+
   scale_y_continuous(expand = c(0.01,0))+
   theme(legend.position = 'bottom', 
@@ -457,10 +429,7 @@ ggarrange(case.g.plot + rremove("ylab"),
 ####################################################
 
 ### Cases
-
-# Cases
-
-case.group <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_GroupLevel_Top10_Cases.csv',
+case.group <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_GroupLevel_Top10_Cases.csv',
                        header=TRUE)
 
 case.group <- case.group %>%
@@ -484,9 +453,9 @@ case.g.long <- melt(case.g.wID, id.vars = c('ER_ID','Case.status','Pathogen','Ca
 case.g.long$value <- as.numeric(case.g.long$value)
 
 
-# Follow-Ups
+### Follow-Ups
 
-follow.group <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_GroupLevel_Top10_FollowUps.csv',
+follow.group <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_GroupLevel_Top10_FollowUps.csv',
                          header=TRUE)
 
 follow.group <- follow.group %>%
@@ -521,7 +490,6 @@ ggplot(data = combined.long, aes(x = Case.Follow_ID, y = value, fill = GROUP))+
                      guide=guide_legend(nrow=2))+
   scale_x_discrete('Num', name = NULL)+
   scale_y_continuous(expand = c(0.01,0))+
-#  facet_wrap( ~ Case.status, strip.position = 'bottom', scales = 'free_x')+ 
   facet_wrap( ~Case.status, strip.position='left', ncol=1, scales = 'free_y')+
   theme(legend.position = 'bottom', 
         legend.title = element_text(face='bold', size=12),
@@ -529,7 +497,6 @@ ggplot(data = combined.long, aes(x = Case.Follow_ID, y = value, fill = GROUP))+
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-        #        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         strip.text = element_text(size=12),
         panel.grid.minor = element_blank(), 
@@ -562,7 +529,6 @@ case.g.plot<-ggplot(data = case.g.long, aes(x = Num, y = value, fill = GROUP))+
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-        #        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         panel.grid.minor = element_blank(), 
         panel.background = element_blank(),
@@ -589,7 +555,6 @@ follow.g.plot<-ggplot(data = follow.g.long, aes(x = Num, y = value, fill = GROUP
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-        #        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         panel.grid.minor = element_blank(), 
         panel.background = element_blank(),
@@ -620,10 +585,7 @@ ggarrange(case.g.plot + rremove("ylab"),
 ####################################################
 
 ### Cases
-
-# Cases
-
-case.mech <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_MechanismLevel_Top10_Cases.csv',
+case.mech <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_MechanismLevel_Top10_Cases.csv',
                        header=TRUE)
 
 case.mech <- case.mech %>%
@@ -661,9 +623,9 @@ case.m.long <- melt(case.m.wID, id.vars = c('ER_ID','Case.status','Pathogen','Ca
 case.m.long$value <- as.numeric(case.m.long$value)
 
 
-# Follow-Ups
+### Follow-Ups
 
-follow.mech <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_MechanismLevel_Top10_FollowUps.csv',
+follow.mech <- read.csv('D://Resistome/Reads_based/Abundance/RelativeAbundance/ALL_TYPES/AverageRelativeAbundance_ALL_TYPES_MechanismLevel_Top10_FollowUps.csv',
                          header=TRUE)
 
 follow.mech<- follow.mech %>%
@@ -716,7 +678,6 @@ ggplot(data = combined.m.long, aes(x = Case.Follow_ID, y = value, fill = MECHANI
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-        #        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         panel.grid.minor = element_blank(), 
         panel.background = element_blank(),
@@ -747,7 +708,6 @@ case.m.plot<-ggplot(data = case.m.long, aes(x = Num, y = value, fill = MECHANISM
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-        #        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         panel.grid.minor = element_blank(), 
         panel.background = element_blank(),
@@ -773,7 +733,6 @@ follow.m.plot<-ggplot(data = follow.m.long, aes(x = Num, y = value, fill = MECHA
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-        #        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         panel.grid.minor = element_blank(), 
         panel.background = element_blank(),
