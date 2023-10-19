@@ -15,9 +15,6 @@
 library(tidyverse)
 library(plyr)
 
-# We will use the 'SamDedupResistome' files since these have been deduplicated. If needed, the original
-# resistome files are available. 
-
 microbiome <- read.csv('D://Microbiome/Reads_based/ERIN_CaseControlFollow_kaiju_SPECIES.csv', header=TRUE)
 microbiome <- microbiome[, colSums(microbiome != 0) > 0] 
 microbiome <- microbiome[rowSums(microbiome != 0) > 0,] 
@@ -63,8 +60,6 @@ ags<- read.csv('D://MicrobeCensus_Output/mc_output_amrplusplus.csv', header=TRUE
 ags$ER_ID = as.character(ags$ER_ID)
 
 # The suggested metric for normalization from MicrobeCensus is RPKG - reads per kilobase per genome equivalent
-# To accomplish this, we must take (# reads mapped to gene)/ (gene length) / (# genome equivalents)
-
 # Unfortunately, the RPKG metric is only calculable for the 'Gene' level resistome data; for all 
 # other data (e.g. microbiome taxonomic levels) we will normalize by number of genome equivalents
 
