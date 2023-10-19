@@ -28,4 +28,13 @@ module purge
 module load GCC/8.3.0
 module load AmrPlusPlus/2.0.2
 
-nextflow run $EBROOTAMRPLUSPLUS/main_AmrPlusPlus_v2_withRGI.nf --reads "/mnt/scratch/hansenzo/ERIN_rawreads_sub/*_R{1,2}.fastq.gz" --host $HOME/Database/HumanRef/GRCh38_latest_genomic.fna.gz --adapters $HOME/Database/adapters.fa --annotation "$EBROOTAMRPLUSPLUS/data/amr/megares_modified_annotations_v2.00.csv" --amr "$EBROOTAMRPLUSPLUS/data/amr/megares_modified_database_v2.00.fasta" --card_db $HOME/amrplusplus/amrplusplus_v2/card.json --output /mnt/scratch/hansenzo/ERIN_amrplusplus_sub -w /mnt/scratch/hansenzo/ERIN_amrplusplus_sub_w -profile singularity 
+nextflow run $EBROOTAMRPLUSPLUS/main_AmrPlusPlus_v2_withRGI.nf /
+  --reads "/mnt/scratch/hansenzo/ERIN_rawreads_sub/*_R{1,2}.fastq.gz" /
+  --host $HOME/Database/HumanRef/GRCh38_latest_genomic.fna.gz /
+  --adapters $HOME/Database/adapters.fa /
+  --annotation "$EBROOTAMRPLUSPLUS/data/amr/megares_modified_annotations_v2.00.csv" /
+  --amr "$EBROOTAMRPLUSPLUS/data/amr/megares_modified_database_v2.00.fasta" /
+  --card_db $HOME/amrplusplus/amrplusplus_v2/card.json /
+  --output /mnt/scratch/hansenzo/ERIN_amrplusplus_sub /
+  -w /mnt/scratch/hansenzo/ERIN_amrplusplus_sub_w /
+  -profile singularity 
