@@ -1,28 +1,27 @@
 ########## R Code for Study Characteristics Analysis - All ERIN Metagenome Samples ##########
 
 # Author: Zoe Hansen
-# Last Modified: 2020.12.29
 
 # This script is meant to perform summaries of study participant demographics using the 
 # 'ERIN_full_metadata" spreadsheet
 
 # The metadata will be used to identify various factors associated with Case, Controls, etc. for a 
-# brief summary in the Results section of Publication #2. 
+# brief summary in the Results section. 
 
 #########################################################
 
 library(tidyverse)
 
-ERIN_full_meta <- read.csv('D://Manning_ERIN/ERIN_MetaData/ERIN_full_metadata.csv', header = TRUE)
+ERIN_full_meta <- read.csv('D://ERIN_full_metadata.csv', header = TRUE)
 
 ERIN_full_meta <- ERIN_full_meta %>%
-  filter(!grepl('\\<23\\>', ID))%>% # We need to use this text to ensure that R is removing *exact* matches, not just the values which could match in other numbers 
-  filter(!grepl('\\<66\\>', ID)) %>%
+  filter(!grepl('\\<23\\>', ID))%>% 
+  filter(!grepl('\\<66\\>', ID))%>%
   filter(!grepl('\\<85\\>', ID))%>%
-  filter(!grepl('\\<86\\>', ID)) %>%
+  filter(!grepl('\\<86\\>', ID))%>%
   filter(Case.status != 'Missing')
 
-# Drop the unused levels (Follow-up and Missing)
+# Drop unused levels (Follow-up and Missing)
 ERIN_full_meta$Case.status <- factor(ERIN_full_meta$Case.status)
 ERIN_full_meta$Age.group <- factor(ERIN_full_meta$Age.group)
 
