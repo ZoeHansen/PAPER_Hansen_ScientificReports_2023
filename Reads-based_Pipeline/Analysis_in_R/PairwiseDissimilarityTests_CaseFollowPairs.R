@@ -1,28 +1,20 @@
 ########################################################
 
-# Aim 2: Mantel Test
-
-# Last Modified: 2022.01.29
+# Mantel Test
 
 ########################################################
-
-# Load libraries and data
 
 library(tidyr)
 library(vegan)
 library(plyr)
 
-pair.mat <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/PairwiseDissimilarity_Tests/ERIN_CaseFollowPairs_binary_matrix_MantelTest.csv',
-                     header=TRUE, row.names = 1)
+pair.mat <- read.csv('D://PairwiseDissimilarity_Tests/ERIN_CaseFollowPairs_binary_matrix_MantelTest.csv', header=TRUE, row.names = 1)
 
 # Change 'pair.mat' variable to a matrix
 pair.mat <- as.matrix(pair.mat)
 
-
 #### Microbiome ####
-micro.abd.data <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/GEnorm_ERIN_kaiju_60CaseFollowPairs_SPECIES.csv',
-                     header=TRUE)
-
+micro.abd.data <- read.csv('D://Microbiome/Reads_based/GEnorm_ERIN_kaiju_60CaseFollowPairs_SPECIES.csv', header=TRUE)
 
 # If microbiome data: 
 micro.abd.data$ER_ID <- micro.abd.data$ER_ID %>%
@@ -38,7 +30,6 @@ data <- micro %>%
   spread(key=names(micro)[1], value = 'value') %>%
   dplyr::rename(., ER_ID=key)
 
-# Remove any lingering zeroes to avoid downstream errors
 data <- data[, colSums(data != 0) > 0]
 data <- data[rowSums(data != 0) > 0,] 
 
@@ -46,32 +37,23 @@ data <- data[rowSums(data != 0) > 0,]
 # Calculate Bray-Curtis Dissimilarity
 
 micro.bc.dist=vegdist(data[,-1], method="bray")
-
 micro.bc.dist.matrix <- as.matrix(micro.bc.dist)
-
 colnames(micro.bc.dist.matrix) <- rownames(micro.bc.dist.matrix) <- data[['ER_ID']]
 
-
 # Perform the Mantel Test
-
 micro_mantel <- mantel(micro.bc.dist.matrix, pair.mat, 
                        method='spearman', 
                        permutations=9999,
                        na.rm=TRUE)
 
-
-
 ##### Resistome #####
 
-arg.abd.data <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/ERIN_GEnorm_ALL_TYPES_gene_level_CaseFollowPairs.csv',
-                         header=TRUE)
+arg.abd.data <- read.csv('D://Resistome/Reads_based/ERIN_GEnorm_ALL_TYPES_gene_level_CaseFollowPairs.csv', header=TRUE)
 
 arg.abd.data <- arg.abd.data[, colSums(arg.abd.data != 0) > 0]
 arg.abd.data <- arg.abd.data[rowSums(arg.abd.data != 0) > 0,]
-
 arg.bc.dist = vegdist(arg.abd.data[,-1], method='bray')
 arg.bc.dist.matrix <- as.matrix(arg.bc.dist)
-
 colnames(arg.bc.dist.matrix) <- rownames(arg.bc.dist.matrix) <- arg.abd.data[['ER_ID']]
 
 arg_mantel <- mantel(arg.bc.dist.matrix, pair.mat,
@@ -79,15 +61,12 @@ arg_mantel <- mantel(arg.bc.dist.matrix, pair.mat,
                      permutations=9999,
                      na.rm=TRUE)
 
-
-
 ##### Microbiome vs. Resistome #####
 
 arg_micro_mantel <- mantel(micro.bc.dist.matrix, arg.bc.dist.matrix,
                            method='spearman',
                            permutations=9999,
                            na.rm=TRUE)
-
 
 #############################################################################
 ################ Plot Histogram of Dissimilarity Measures ###################
@@ -106,7 +85,6 @@ case.follow.pairs <- pairs.pairwise.df %>%
   dplyr::filter(dist == 1) %>%
   dplyr::select(-dist)
 
-
 ### Microbiome
 
 micro.pairwise.dist <- t(combn(colnames(micro.bc.dist.matrix), 2))
@@ -117,19 +95,15 @@ colnames(micro.pairwise.df) <- c('sample1','sample2','dist')
 all.mean <- mean(micro.pairwise.df$dist)
 
 
-# Extract acutal paired Case-Follow samples and calculate mean
-
+# Extract actual paired Case-Follow samples and calculate mean
 cf.pairs.dist <- dplyr::left_join(case.follow.pairs, micro.pairwise.df, by=c('sample1','sample2'))
-
 cf.pairs.mean <- mean(cf.pairs.dist$dist)
-
 
 # Perform t-test to statistically compare means
 t.test(micro.pairwise.df$dist, cf.pairs.dist$dist, 
        var.equal = FALSE, # specify that the variance will differ between groups
        conf.level = 0.95,
        alternative = 'greater') # the is that 'x' has a greater mean than 'y'
-
 
 # Set the breaks for the histogram
 hist.breaks <- seq(0,1, by=0.05)
@@ -172,24 +146,18 @@ arg.pairwise.dist <- t(combn(colnames(arg.bc.dist.matrix), 2))
 arg.pairwise.df <- data.frame(arg.pairwise.dist, dist=arg.bc.dist.matrix[arg.pairwise.dist])
 colnames(arg.pairwise.df) <- c('sample1','sample2','dist')
 
-
 # Calculate the mean for pairwise distances across samples
 all.mean <- mean(arg.pairwise.df$dist)
 
-
 # Extract acutal paired Case-Follow samples and calculate mean
-
 cf.pairs.dist <- dplyr::left_join(case.follow.pairs, arg.pairwise.df, by=c('sample1','sample2'))
-
 cf.pairs.mean <- mean(cf.pairs.dist$dist)
-
 
 # Perform t-test to statistically compare means
 t.test(arg.pairwise.df$dist, cf.pairs.dist$dist, 
        var.equal = FALSE, # specify that the variance will differ between groups
        conf.level = 0.95,
        alternative = 'greater') # the is that 'x' has a greater mean than 'y'
-
 
 # Set the breaks for the histogram
 hist.breaks <- seq(0,1, by=0.025)
