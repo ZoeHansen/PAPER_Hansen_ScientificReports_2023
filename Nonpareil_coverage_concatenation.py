@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Nonpareil Output File Merge - Aim 2
+Nonpareil Output File Merge 
 
 Author: Zoe Hansen
 Last Modified: 2022.01.14
@@ -14,15 +14,14 @@ import os
 from random import randint
 
 #Set root directory
-rootdir1=r'D://HPCC/Spring2021_Aim2_Pipeline/Nonpareil_coverage_012022/'
+rootdir1=r'D://HPCC/Nonpareil_coverage/'
 os.chdir(rootdir1)
 
 # Designate our sample numbers we wish to iterate through
-samples = open('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ERIN_samples_IDs_clean.txt')
+samples = open('ERIN_samples_IDs_clean.txt')
 samples1 = samples.read().splitlines()
 
 # Make a table containing our file name, sample ID, and color designations
-
 
 data=[]
 for i in samples1: 
@@ -46,7 +45,7 @@ npo_df['color'] = col_vector
 
 print(npo_df)
 
-npo_df.to_csv('ERIN_Nonpareil_npo_output_files.csv', sep = ',', index = False )
+npo_df.to_csv('Nonpareil_npo_output_files.csv', sep = ',', index = False )
 
 
 
