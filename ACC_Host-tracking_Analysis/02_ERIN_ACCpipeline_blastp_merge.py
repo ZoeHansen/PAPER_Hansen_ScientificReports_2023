@@ -1,28 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Aug 16 13:21:36 2021
-
 @author: Zoe Hansen
 Last Modified: 2021.08.16
 """
 ### This script will first create CSV files and modify the blastp output from the ARG-carrying contigs pipeline.
 ### We will then identify the most-likely taxa identified in relation to ARGs on each contig within each sample.
-###         For this, a new CSV file will be produced for each sample with one taxa-ARG connection per contig.
+### For this, a new CSV file will be produced for each sample with one taxa-ARG connection per contig.
 ### Upon completion of this ranking, we can merge the final files for downstream analysis.
 
 ###########################
 # Create CSV files for each sample directly from BLASTP output
 ###########################
 
-#Read in .txt files to .csv files (try to remove columns, rename columns in the process)
+#Read in TXT files to CSV files (try to remove columns, rename columns in the process)
 import pandas as pd
 import os
 import numpy as np
 
-rootdir = r'D://HPCC/Spring2021_Aim2_Pipeline/ACC_pipeline/082021_BLASTP_annotations/TXT_files/'
+rootdir = r'D://HPCC/ACC_pipeline/BLASTP_annotations/TXT_files/'
 os.chdir(rootdir)
     
-a=open('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ERIN_samples_IDs_clean.txt')
+a=open('ERIN_samples_IDs_clean.txt')
 a1 = a.read().splitlines()
 
 for i in a1:
@@ -32,10 +30,16 @@ for i in a1:
                     'send', 'evalue', 'bitscore', 'score', 'length', 'mismatch', 'gapopen', 'pident', 'nident', 
                     'btop', 'staxids', 'sscinames', 'scomnames', 'sblastnames', 'sskingdoms', 'stitle', 'qcovs',
                     'qcovhsp']
-    accs.to_csv('D://HPCC/Spring2021_Aim2_Pipeline/ACC_pipeline/082021_BLASTP_annotations/CSV_files/'+"".join(i)+'.acc_blastp.csv', sep = ',', index=False)
+    accs.to_csv('D://HPCC/ACC_pipeline/BLASTP_annotations/CSV_files/'+"".join(i)+'.acc_blastp.csv', sep = ',', index=False)
     print(i)  
   
 a.close()
+
+##################################################################################
+
+# The following code will be performed for a SINGLE sample to explain which data are
+# being isolated in each step. The remaining samples will be considered/merged in a 
+# for-loop below.
 
 ##################################
 # Quantify the number of ACCs per sample
@@ -44,7 +48,7 @@ a.close()
 # This code will collapse all unique contig names for each sample and retrieve a count of 
 # the total number of ACCs per sample. These counts will be concatenated into a merged file
 
-newdir = r'D://HPCC/Spring2021_Aim2_Pipeline/ACC_pipeline/082021_BLASTP_annotations/CSV_files/'
+newdir = r'D://HPCC/ACC_pipeline/BLASTP_annotations/CSV_files/'
 os.chdir(newdir)
   
 acc_csv = pd.read_csv(r'ER0003.acc_blastp.csv', sep=',', header = 0)
@@ -97,7 +101,7 @@ acc_quant_merged.to_csv(r'D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysi
 
 # Note: I wanted to retain the single-sample code in case troubelshooting is needed
 
-newdir = r'D://HPCC/Spring2021_Aim2_Pipeline/ACC_pipeline/082021_BLASTP_annotations/CSV_files/'
+newdir = r'D://HPCC/ACC_pipeline/BLASTP_annotations/CSV_files/'
 os.chdir(newdir)
 
 blast = pd.read_csv('ER0003.acc_blastp.csv', sep=',', header=0)
@@ -246,11 +250,13 @@ host_merged.to_csv('D://HPCC/ER0003_test_hostmerged.csv', sep=',', index=False)
 
 # Remove ARG information and sort by 'genus' column; obtain a "count" of these columns and divide by total 
 # number of rows to achieve percentage of each sample's ACCs attributed to each genus
+
 genera = pd.DataFrame(top_merged['genus'].value_counts())
 genera.reset_index(level=0, inplace=True)
 genera.columns = ['genus','hits']
 
 # Determine percentage of ACCs attributed to each genus
+
 genera['genus_percent'] = (genera['hits'] / genera['hits'].sum()) * 100 
 
 # In this output, the 'genus_percent' column indicates the percentage of all genera assigned to ACCs in a sample. 
@@ -259,7 +265,6 @@ genera['genus_percent'] = (genera['hits'] / genera['hits'].sum()) * 100
 
 # Write to CSV:
 genera.to_csv('D://HPCC/ER0003_test_generapct.csv', sep=',', index=False)
-
 
 ##########################################################################
 ##########################################################################
@@ -270,11 +275,11 @@ genera.to_csv('D://HPCC/ER0003_test_generapct.csv', sep=',', index=False)
 ##########################################################################
 
 # Redefine 'a1' just in case it was lost prior    
-a=open('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ERIN_samples_IDs_clean.txt')
+a=open('ERIN_samples_IDs_clean.txt')
 a1 = a.read().splitlines()
 
 # Change directory to location of BLASTP CSV output files
-newdir = r'D://HPCC/Spring2021_Aim2_Pipeline/ACC_pipeline/082021_BLASTP_annotations/CSV_files/'
+newdir = r'D://HPCC/ACC_pipeline/BLASTP_annotations/CSV_files/'
 os.chdir(newdir)
 
 for i in a1:
@@ -316,7 +321,7 @@ for i in a1:
     blast_args=blast_args[['contig_id','arg','arg_hits','arg_pct']]
     # MERGED
     blast_merged=pd.merge(blast_genus, blast_args, how='outer', on='contig_id')
-    blast_merged.to_csv('D://HPCC/Spring2021_Aim2_Pipeline/ACC_Pipeline/122021_BLASTP_sorted_csvs/blastp_genera_arg_total_merged/'+"".join(i)+'_genera_arg_total_merged.csv', sep=',', index=False)
+    blast_merged.to_csv('D://HPCC/ACC_Pipeline/BLASTP_sorted_csvs/blastp_genera_arg_total_merged/'+"".join(i)+'_genera_arg_total_merged.csv', sep=',', index=False)
     print(i,': blast_merged')
     # TOP GENERA & ARGs
     top_genus = pd.DataFrame(blast_genus)
@@ -328,7 +333,7 @@ for i in a1:
     top_args.reset_index(drop=True, inplace=True)
     top_args.columns=(['contig_id','arg','arg_hits','arg_pct'])
     top_merged = pd.merge(top_genus, top_args, how='outer', on='contig_id')
-    top_merged.to_csv('D://HPCC/Spring2021_Aim2_Pipeline/ACC_Pipeline/122021_BLASTP_sorted_csvs/blastp_top_genera_arg_merged/'+"".join(i)+'_top_genera_args.csv', sep = ',', index = False)
+    top_merged.to_csv('D://HPCC/ACC_Pipeline/BLASTP_sorted_csvs/blastp_top_genera_arg_merged/'+"".join(i)+'_top_genera_args.csv', sep = ',', index = False)
     print(i,': top_merged')
     # ARGs PER GENUS
     hosts = top_merged.sort_values(by=['genus'])
@@ -347,14 +352,14 @@ for i in a1:
     hosts3_pcts.reset_index(level=0, inplace=True)
     hosts3_pcts = hosts3_pcts[['genus','arg','arg_pct']]
     host_merged=pd.merge(hosts3, hosts3_pcts, how='outer', on=['genus','arg'])
-    host_merged.to_csv('D://HPCC/Spring2021_Aim2_Pipeline/ACC_Pipeline/122021_BLASTP_sorted_csvs/blastp_args_per_genus/'+"".join(i)+'_args_per_genus.csv', sep=',', index=False)
+    host_merged.to_csv('D://HPCC/ACC_Pipeline/BLASTP_sorted_csvs/blastp_args_per_genus/'+"".join(i)+'_args_per_genus.csv', sep=',', index=False)
     print(i,': ARGs_per_genus')
     # GENERA PER SAMPLE
     genera = pd.DataFrame(top_merged['genus'].value_counts())
     genera.reset_index(level=0, inplace=True)
     genera.columns = ['genus','hits']
     genera['genus_percent'] = (genera['hits'] / genera['hits'].sum()) * 100 
-    genera.to_csv('D://HPCC/Spring2021_Aim2_Pipeline/ACC_Pipeline/122021_BLASTP_sorted_csvs/blastp_genera_per_sample/'+"".join(i)+'_genera_per_sample.csv', sep=',', index=False)
+    genera.to_csv('D://HPCC/ACC_Pipeline/BLASTP_sorted_csvs/blastp_genera_per_sample/'+"".join(i)+'_genera_per_sample.csv', sep=',', index=False)
     print(i,': genera_per_sample')
     
 a.close()    
@@ -367,7 +372,7 @@ a.close()
 ##################################
 
 # First, we will merge the 'ARGs_per_genera' files
-dir1 = r'D://HPCC/Spring2021_Aim2_Pipeline/ACC_Pipeline/122021_BLASTP_sorted_csvs/blastp_args_per_genus/'
+dir1 = r'D://HPCC/ACC_Pipeline/BLASTP_sorted_csvs/blastp_args_per_genus/'
 os.chdir(dir1)
 
 # Create a new variable 'a2' excluding our first two samples which initiate the merged file
@@ -418,7 +423,7 @@ apg_merged.to_csv('ERIN_args_per_genus_merged_pcts.csv', sep = ',', index = Fals
 # Now we will do the 'genera_per_sample' files
 
 # First, we will merge the 'ARGs_per_genera' files
-dir2 = r'D://HPCC/Spring2021_Aim2_Pipeline/ACC_Pipeline/122021_BLASTP_sorted_csvs/blastp_genera_per_sample/'
+dir2 = r'D://HPCC/ACC_Pipeline/BLASTP_sorted_csvs/blastp_genera_per_sample/'
 os.chdir(dir2)
 
 # Create a new variable 'a2' excluding our first two samples which initiate the merged file
@@ -466,7 +471,7 @@ gps_merged.to_csv('ERIN_genera_per_sample_merged_hits.csv', sep = ',', index = F
 # Investigating Percent Identity
 ####################################################
 
-newdir = r'D://HPCC/Spring2021_Aim2_Pipeline/ACC_pipeline/082021_BLASTP_annotations/CSV_files/'
+newdir = r'D://HPCC/ACC_pipeline/BLASTP_annotations/CSV_files/'
 os.chdir(newdir)
 
 acc_csv = pd.read_csv(r'ER0003.acc_blastp.csv', sep=',', header = 0)
@@ -502,7 +507,7 @@ for i in a2:
 
 print(acc_pctid_merged)
 
-acc_pctid_merged.to_csv(r'D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ACC_analysis/ERIN_avg_percent_id_per_contig.csv', sep = ',', index = False)
+acc_pctid_merged.to_csv(r'D://ACC_analysis/ERIN_avg_percent_id_per_contig.csv', sep = ',', index = False)
 
 
 
