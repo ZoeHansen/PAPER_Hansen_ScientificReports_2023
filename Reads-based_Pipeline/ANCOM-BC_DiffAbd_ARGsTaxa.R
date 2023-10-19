@@ -1,6 +1,6 @@
 #################################################
 
-# Aim 2: ANCOM-BC for Differentially Abundant Taxa & ARGs
+# ANCOM-BC for Differentially Abundant Taxa & ARGs
 
 #################################################
 
@@ -19,18 +19,15 @@ library(ANCOMBC)
 #### Load and create your 'OTU' table #####
 
 # Microbiome
-otu <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/GEnorm_ERIN_kaiju_60CaseFollowPairs_PHYLUM.csv',
-                header=TRUE)
+otu <- read.csv('D://Microbiome/Reads_based/GEnorm_ERIN_kaiju_60CaseFollowPairs_PHYLUM.csv', header=TRUE)
 
 # Resistome (requires transposition)
-otu <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Resistome/Reads_based/ERIN_GEnorm_ALL_TYPES_class_level_CaseFollowPairs.csv',
-                header=TRUE)
+otu <- read.csv('D://Resistome/Reads_based/ERIN_GEnorm_ALL_TYPES_class_level_CaseFollowPairs.csv', header=TRUE)
 
 otu <- otu %>%
   gather(key = key, value = value, 2:ncol(otu)) %>%
   spread(key=names(otu)[1], value = 'value') %>%
   dplyr::rename(., ER_ID=key)
-
 
 otu<- otu[, colSums(otu[,-1] != 0) > 0] 
 otu <- otu[rowSums(otu[,-1] != 0) > 0,]
@@ -44,7 +41,6 @@ rownames(otu)<- otu$ER_ID
 # Double check to see that your read counts match that expected
 count <- colSums(otu[, c(2:ncol(otu))], na.rm = TRUE)
 count
-
 
 ###### Load and create your Taxonomy table #####
 taxa<- otu %>% 
@@ -66,7 +62,6 @@ str(taxa)
 # Rownames must be consistent across tables
 rownames(taxa)<- taxa$ARG_class
 
-
 #now you can delete the first columns of both OTU and taxa tables
 # because they are now the rownames, and therefore redundant in the first column
 otu<- otu %>% 
@@ -75,15 +70,12 @@ otu<- otu %>%
 taxa<- taxa %>% 
   dplyr::select(-ER_ID)
 
-
 ###### Load your metadata #####
 
-meta <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ERIN_Metagenomes_Metadata_60_CaseFollowPairs.csv',
-                 header = TRUE)
+meta <- read.csv('D://ERIN_Metagenomes_Metadata_60_CaseFollowPairs.csv', header = TRUE)
 
 meta <- meta %>%
   dplyr::select(ER_ID, Case.status, Pathogen, Case.Follow_ID, Run)
-
 
 colnames(meta) <- c('ER_ID','Case.status','Pathogen', 'PairID','Seq_Run')
 str(meta)
@@ -99,7 +91,6 @@ meta<- meta %>%
 meta$Case.status<- factor(meta$Case.status, levels = c("Case","FollowUp"))
 meta$Pathogen <- factor(meta$Pathogen, levels = c('Campylobacter (CA)','Salmonella (SA)',
                                                   'Shigella (SH)', 'STEC (EC)'))
-
 
 ##### Running Phyloseq #####
 
@@ -124,7 +115,6 @@ sample_variables(phylo_object)  #factors
 otu_table(phylo_object)[1:3, 1:2]
 taxa_names(phylo_object)[1:5]
 
-
 ##### Running ANCOM-BC #####
 
 ancom_out <- ancombc(phyloseq = phylo_object,
@@ -144,7 +134,6 @@ ancom_out <- ancombc(phyloseq = phylo_object,
 
 # Note: for our microbiome data, I included sequencing run as a confounder/covariate in the formula
 # This does not need to be included for the resistome since envfit() didn't pull it out for now
-
 
 results <- ancom_out$res  # isolate the results output from ANCOM-BC
 
@@ -173,7 +162,7 @@ ancom_signif_final <- as.data.frame(cbind(ancom_signif_names,
                                           ancom_signif_qval,
                                           ancom_signif_da))
 
-write.csv(ancom_signif_final, "D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ANCOM-BC/ANCOMBC_ARG_CLASS_CaseStatusRun_CaseFollowPairs.csv",
+write.csv(ancom_signif_final, "D://ANCOM-BC/ANCOMBC_ARG_CLASS_CaseStatusRun_CaseFollowPairs.csv",
           row.names = FALSE)
 
 # Note: the coefficients in the 'beta' column refer to fold-change values relative to the reference
@@ -187,9 +176,7 @@ write.csv(ancom_signif_final, "D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAn
 
 ########### Plotting ANCOM-BC Output #################
 
-ancom_signif_final <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ANCOM-BC/ANCOMBC_ARG_GROUP_CaseStatusRun_CaseFollowPairs.csv',
-                      header=TRUE)
-
+ancom_signif_final <- read.csv('D://ANCOM-BC/ANCOMBC_ARG_GROUP_CaseStatusRun_CaseFollowPairs.csv', header=TRUE)
 
 ancom.data <- ancom_signif_final %>%
   filter(Case.statusFollowUp.qval<0.05)%>%
@@ -220,7 +207,3 @@ ggplot(data=ancom.data, aes(x = ARG_group, y = Case.statusFollowUp.beta, fill=Ca
     x = '\nARG Group\n',
     y = '\nCoefficient\n',
     fill = 'Health Status')
-
-
-
-
