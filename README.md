@@ -1,7 +1,7 @@
 # PAPER_Hansen_ScientificReports_2023
 ## Recovery of the gut microbiome following enteric infection and persistence of antimicrobial resistance genes in specific microbial hosts
 
-### Zoe A Hansen, Karla Vasco, James T. Rudrik, Kim T. Scribner, Lixin Zhang, Shannon D. Manning
+### Zoe A. Hansen, Karla Vasco, James T. Rudrik, Kim T. Scribner, Lixin Zhang, Shannon D. Manning
 
 ### Data
 Raw data for this study are available on NCBI under the BioProjects PRJNA862908 and PRJNA660443 (BioSamples SAMN29999523 to SAMN29999673 and SAMN15958881 to SAMN15958950, respectively).
