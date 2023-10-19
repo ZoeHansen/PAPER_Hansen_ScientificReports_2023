@@ -1,13 +1,9 @@
 #################################################
 
-# Aim 2: Relative Abundance - Microbiome - Case, Control, Follow
-
+# Relative Abundance - Microbiome - Cases & Follow-Ups
 # Author: Zoe Hansen
-# Last Modified: 2022.01.14
 
 #################################################
-# Load libraries and data
-
 library(ggplot2)
 library(tidyverse)
 library(ggpubr)
@@ -18,7 +14,7 @@ library(ggthemes)
 library(scales)
 library(viridis)
 
-microbiome <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/GEnorm_ERIN_kaiju_CaseControlFollow_SPECIES.csv',
+microbiome <- read.csv('D://Microbiome/Reads_based/GEnorm_ERIN_kaiju_CaseControlFollow_SPECIES.csv',
                        header = TRUE)
 
 # Since some fields have NA, we need to redefine and combine them
@@ -41,8 +37,7 @@ micro_data <- micro_data[rowSums(micro_data !=0)>0,]
 
 # Import metadata
 
-meta <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/ERIN_Metagenomes_Metadata_60_CaseFollowPairs.csv',
-                 header = TRUE)
+meta <- read.csv('D://ERIN_Metagenomes_Metadata_60_CaseFollowPairs.csv', header = TRUE)
 
 meta <- meta %>%
   dplyr::select(ER_ID, Case.status, Pathogen, Case.Follow_ID)%>%
@@ -50,34 +45,24 @@ meta <- meta %>%
   #  filter(!grepl('FollowUp', Case.status))%>%
   drop_na()
 
-
 #################################################
-# Calculate relative abundance of ARGs in samples
+# Calculate relative abundance of taxa in samples
 #################################################
-
-# This was used to transpose the hierarchical labels of Type, Class, Group
-#classt = setNames(data.frame(t(class_data[,-1])), class_data[,1])
-#classt <- classt %>%
-#  rownames_to_column('ER_ID')
 
 # Add a column with the total reads/genome equivalents for each sample
 micro_data1 <- micro_data %>%
   mutate(., SampTotal = rowSums(micro_data[,-1]))
 
-
 # Create a new dataframe with the relative abundance information
 ra <- cbind(micro_data1$ER_ID, micro_data1[, -c(1,40024)] / micro_data1$SampTotal)
 colnames(ra)[1] <- 'ER_ID'
-
 
 # Merge our relative abundance dataframe with metadata and order by Case.status
 ra_df <- left_join(meta, ra, by = "ER_ID") %>%
   arrange(., Case.status)
 
-
 ####### Rename Select Columns ######
 ra_df <-dplyr::rename(ra_df, 'Multi-compound' = 'Multi.compound')
-
 ra_df <- ra_df[, colSums(ra_df != 0)>0]
 
 ra_df_t <- ra_df %>%
@@ -85,15 +70,12 @@ ra_df_t <- ra_df %>%
   spread(key=names(ra_df)[1], value = 'value') %>%
   dplyr::rename(., ER_ID=key)
 
-write.csv(ra_df_t, 'D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/RelativeAbundance_GENUS_CaseFollowPairs.csv',
+write.csv(ra_df_t, 'D://Microbiome/Reads_based/Abundance/RelativeAbundance/RelativeAbundance_GENUS_CaseFollowPairs.csv',
           row.names = FALSE)
 
 #################################################
 # Prepare data for plotting
 #################################################
-
-ra_df <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/RelativeAbundance_GENUS_CaseFollowPairs.csv',
-                  header=TRUE, check.names = FALSE)
 
 # Extract Case status data to append later (the melt function requires only one variable to collapse upon)
 ra_df_ordered <- ra_df %>%
@@ -102,7 +84,6 @@ ra_df_ordered <- ra_df %>%
 #  arrange(.,Pathogen)
 
 Health <- ra_df_ordered$Case.status
-Bact <- ra_df_ordered$Pathogen
 
 # Remove the case status data from the dataframe to prepare for melting 
 ra_df.cc <- ra_df_ordered%>%
@@ -110,17 +91,11 @@ ra_df.cc <- ra_df_ordered%>%
 
 # Create an arbitrary sequential numbering system to avoid spacing in the x-axis of the plot
 id.num <- seq(1,120,1)
-id.num.case <- seq(1,60,1)
 
 # Melt our ra_df.cc variable, and attach the Health and Num variables to the dataframe
 ra_df.long <- melt(ra_df.cc, id.vars = 'ER_ID', variable.name = 'Kingdom')
 ra_df.long$Case.status = rep(Health, times = (ncol(ra_df.cc)-1))
 ra_df.long$Num = rep(id.num, times = (ncol(ra_df.cc)-1))
-
-ra_df.long <- melt(ra_df.cc, id.vars = 'ER_ID', variable.name = 'Resistance_Class')
-ra_df.long$Bacteria = rep(Bact, times = (ncol(ra_df.cc)-1))
-ra_df.long$Num = rep(id.num.case, times = (ncol(ra_df.cc)-1))
-
 
 #################################################
 # Plot relative abundance 
@@ -130,7 +105,6 @@ ra_df.long$Num = rep(id.num.case, times = (ncol(ra_df.cc)-1))
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 
 ### Create the plot
-
 # Facet by Health Status
 ggplot(data = ra_df.long, aes(x = Num, y = value, fill = Kingdom))+
   geom_bar(stat = 'identity', width = 1, position = 'stack')+ 
@@ -146,7 +120,6 @@ ggplot(data = ra_df.long, aes(x = Num, y = value, fill = Kingdom))+
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-        #        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         panel.grid.minor = element_blank(), 
         panel.background = element_blank(),
@@ -197,13 +170,11 @@ ggplot(data = ra_df.long, aes(x = Num, y = value, fill = Resistance_Class))+
 ### PHYLUM ###
 
 # Case
-
-case.phylum <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_PHYLUM_Top10_CasesOnly.csv',
+case.phylum <- read.csv('D://Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_PHYLUM_Top10_CasesOnly.csv',
                         header=TRUE)
 case.phylum <- case.phylum %>%
   select(-AvgRA) %>%
   filter(ER_ID != 'Case.status')
-
 
 case.p.t <- case.phylum %>%
   gather(key = key, value = value, 2:ncol(case.phylum)) %>%
@@ -227,7 +198,7 @@ case.p.long$value <- as.numeric(case.p.long$value)
 
 # Follow-Ups
 
-follow.phylum <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_PHYLUM_Top10_FollowUpsOnly.csv',
+follow.phylum <- read.csv('D://Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_PHYLUM_Top10_FollowUpsOnly.csv',
                            header=TRUE)
 follow.phylum <- follow.phylum %>%
   select(-AvgRA) %>%
@@ -263,7 +234,6 @@ ggplot(data = combined.p.long, aes(x = Case.Follow_ID, y = value, fill = Phylum)
                      guide=guide_legend(nrow=4))+
   scale_x_discrete('Num', name = NULL)+
   scale_y_continuous(expand = c(0.01,0))+
-#  facet_wrap( ~ Case.status, strip.position = 'bottom', scales = 'free_x')+ 
   facet_wrap( ~Case.status, strip.position='left', ncol=1, scales = 'free_y')+
   theme(legend.position = 'bottom', 
         legend.title = element_text(face='bold', size=12),
@@ -271,7 +241,6 @@ ggplot(data = combined.p.long, aes(x = Case.Follow_ID, y = value, fill = Phylum)
         legend.key.height = unit(0.5, 'cm'),
         legend.key.width = unit(0.5, 'cm'),
         panel.grid.major = element_blank(),
-        #        panel.spacing = unit(0, 'lines'),
         strip.background = element_blank(),
         strip.text = element_text(size=12),
         panel.grid.minor = element_blank(), 
@@ -284,7 +253,7 @@ ggplot(data = combined.p.long, aes(x = Case.Follow_ID, y = value, fill = Phylum)
         strip.text.x = element_text(size =14), 
         axis.line = element_line(colour = 'black'))+
   labs(fill = 'Phylum')+
-#  xlab('\nHealth Status\n')+
+  xlab('\nHealth Status\n')+
   ylab('Relative Abundance per Sample\n')
 
 
@@ -360,7 +329,7 @@ ggarrange(case.p.plot + rremove("ylab"),
 
 # Cases
 
-case.genus <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_GENUS_Top25_CasesOnly.csv',
+case.genus <- read.csv('D://Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_GENUS_Top25_CasesOnly.csv',
                         header=TRUE)
 
 case.genus <- case.genus %>%
@@ -389,7 +358,7 @@ case.g.long$value <- as.numeric(case.g.long$value)
 
 # Follow-Ups
 
-follow.genus <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_GENUS_Top25_FollowUpsOnly.csv',
+follow.genus <- read.csv('D://Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_GENUS_Top25_FollowUpsOnly.csv',
                        header=TRUE)
 
 follow.genus <- follow.genus %>%
@@ -520,7 +489,7 @@ ggarrange(case.g.plot + rremove("ylab"),
 
 # Cases
 
-case.genus10 <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_GENUS_Top10_CasesOnly.csv',
+case.genus10 <- read.csv('D://Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_GENUS_Top10_CasesOnly.csv',
                        header=TRUE)
 
 case.genus10 <- case.genus10 %>%
@@ -553,7 +522,7 @@ case.g.long10$value <- as.numeric(case.g.long10$value)
 
 # Follow-Ups
 
-follow.genus10 <- read.csv('D://Manning_ERIN/ERIN_FullDataset_AIM_TWO/ThirdAnalysis_MEGARes_v2/Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_GENUS_Top10_FollowUpsOnly.csv',
+follow.genus10 <- read.csv('D://Microbiome/Reads_based/Abundance/RelativeAbundance/AverageRelativeAbundance_GENUS_Top10_FollowUpsOnly.csv',
                          header=TRUE)
 
 follow.genus10 <- follow.genus10 %>%
@@ -649,8 +618,6 @@ case.g.plot<- ggplot(data = case.g.long, aes(x = Num, y = value, fill = Genus))+
   ylab('Relative Abundance per Sample\n')
 
 
-
-
 follow.g.plot<-ggplot(data = follow.g.long, aes(x = Num, y = value, fill = Genus))+
   geom_bar(stat = 'identity', width = 1, position = 'stack')+ 
   scale_color_viridis(discrete = TRUE)+
@@ -686,7 +653,3 @@ ggarrange(case.g.plot + rremove("ylab"),
           vjust = 0.10,
           ncol = 2, nrow = 1)+
   theme(plot.margin = margin(0.5,0.1,0.1,0.5, "cm"))
-
-
-
-
